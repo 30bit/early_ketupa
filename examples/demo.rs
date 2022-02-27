@@ -37,17 +37,17 @@ async fn main() {
         let point_near_mouse = point_near(&points, mouse);
         let line_near_mouse = point_near_mouse.or_else(|| line_near(&points, mouse));
 
-        let dir = owlet::dirs::degrees(look_degrees as f32);
+        let dir = early_ketupa::dirs::degrees(look_degrees as f32);
         let inv = Mat2::from_angle((look_degrees as f32 - 90.0).to_radians());
-        let look = owlet::Look::new(|i: usize| points[i].into(), dir);
+        let look = early_ketupa::Look::new(|i: usize| points[i].into(), dir);
 
-        let minmax = owlet::core::Minmax::new(look, 0..points.len());
+        let minmax = early_ketupa::core::Minmax::new(look, 0..points.len());
         let ((min_index, min_norm), (max_index, max_norm)) = minmax.unwrap_pair();
 
         let mut marker_color = BLANK;
         let view = {
             let mut prev_index = max_index;
-            let iter = owlet::core::Iter::new(look, 0..points.len(), minmax).inspect(
+            let iter = early_ketupa::core::Iter::new(look, 0..points.len(), minmax).inspect(
                 |(category, segment)| {
                     process_segment(
                         &points,
@@ -60,7 +60,7 @@ async fn main() {
                     )
                 },
             );
-            owlet::View::with_iter(look, 0..points.len(), iter)
+            early_ketupa::View::with_iter(look, 0..points.len(), iter)
         };
 
         let shadow = {
@@ -150,8 +150,8 @@ fn process_segment(
     marker_color: &mut Color,
     point_near_mouse: Option<usize>,
     line_near_mouse: Option<usize>,
-    category: &owlet::core::Category,
-    segment: &owlet::core::Segment<usize, f32>,
+    category: &early_ketupa::core::Category,
+    segment: &early_ketupa::core::Segment<usize, f32>,
 ) {
     let within = |start, end| {
         (start..end).contains(&point_near_mouse.or(line_near_mouse).unwrap_or(usize::MAX))
@@ -161,9 +161,9 @@ fn process_segment(
         | within(*prev_index, segment.to.0)
     {
         *marker_color = match category {
-            owlet::core::Category::Obscuring => RED,
-            owlet::core::Category::Contiguous => GREEN,
-            owlet::core::Category::Partial => BLUE,
+            early_ketupa::core::Category::Obscuring => RED,
+            early_ketupa::core::Category::Contiguous => GREEN,
+            early_ketupa::core::Category::Partial => BLUE,
         }
     }
     *prev_index = segment.to.0;
@@ -196,9 +196,9 @@ fn process_mouse(
 }
 
 fn light_points<'a>(
-    look: impl owlet::core::Norm<usize, f32> + owlet::core::Point<usize, f32> + Copy + 'a,
+    look: impl early_ketupa::core::Norm<usize, f32> + early_ketupa::core::Point<usize, f32> + Copy + 'a,
     len: usize,
-    hull: &'a owlet::core::Hull<usize, f32>,
+    hull: &'a early_ketupa::core::Hull<usize, f32>,
 ) -> impl Iterator<Item = Vec2> + 'a {
     let decrement = |i: usize| i.checked_sub(1).unwrap_or(len - 1);
     let with_norm = |i| (i, look.norm(i));
@@ -212,7 +212,7 @@ fn light_points<'a>(
                     (prev, None)
                 } else {
                     let successor = (prev + 1) % len;
-                    let s = owlet::core::Segment::new(with_norm(prev), with_norm(successor));
+                    let s = early_ketupa::core::Segment::new(with_norm(prev), with_norm(successor));
                     let mid = s.lerp(look, look.norm(next));
                     (prev, Some(mid))
                 }
@@ -239,7 +239,7 @@ fn light_points<'a>(
 
     for (i, j, extrusion) in main {
         extrude(&mut light, extrusion);
-        let partial = owlet::core::Segment::new(with_norm(decrement(i)), with_norm(i));
+        let partial = early_ketupa::core::Segment::new(with_norm(decrement(i)), with_norm(i));
         light.push(partial.lerp(look, hull.norms[j - 1]));
         light.push(partial.lerp(look, hull.norms[j]));
     }
