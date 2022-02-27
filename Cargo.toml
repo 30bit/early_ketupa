@@ -1,0 +1,14 @@
+[package]
+name = "owlet"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+mint = "0.5"
+num-traits = "0.2"
+
+[dev-dependencies]
+macroquad = "0.3"
+lyon_tessellation = "0.17"
+glam = { version = "0.14", features = ["mint"] }
+euclid = { version = "0.22", features = ["mint"] }
